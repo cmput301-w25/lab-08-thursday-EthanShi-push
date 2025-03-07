@@ -1,5 +1,6 @@
 package com.example.androidcicd;
 
+import static androidx.test.espresso.Espresso.onData;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.action.ViewActions.longClick;
@@ -9,6 +10,10 @@ import static androidx.test.espresso.matcher.ViewMatchers.hasErrorText;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.instanceOf;
 
 import android.util.Log;
 
@@ -87,18 +92,27 @@ public class MainActivityTest {
 
     @Test
     public void appShouldDisplayExistingMoviesOnLaunch() {
-        // Check that the initial data is loaded
-        onView(withText("Oppenheimer")).check(matches(isDisplayed()));
-        onView(withText("Barbie")).check(matches(isDisplayed()));
+        // Match "Oppenheimer" in the ListView
+        onData(allOf(is(instanceOf(String.class)), is("Oppenheimer")))
+                .inAdapterView(withId(R.id.listviewMovies))
+                .check(matches(isDisplayed()));
 
-        // Click on Oppenheimer
-        onView(withText("Oppenheimer")).perform(click());
+        // Match "Barbie" in the ListView
+        onData(allOf(is(instanceOf(String.class)), is("Barbie")))
+                .inAdapterView(withId(R.id.listviewMovies))
+                .check(matches(isDisplayed()));
 
-        // Check that the movie details are displayed correctly
+        // Click on "Oppenheimer"
+        onData(allOf(is(instanceOf(String.class)), is("Oppenheimer")))
+                .inAdapterView(withId(R.id.listviewMovies))
+                .perform(click());
+
+        // Now use onView(...) because the details screen is in the view hierarchy
         onView(withId(R.id.edit_title)).check(matches(withText("Oppenheimer")));
         onView(withId(R.id.edit_genre)).check(matches(withText("Thriller/Historical Drama")));
         onView(withId(R.id.edit_year)).check(matches(withText("2023")));
     }
+
 
     @Test
     public void addMovieShouldShowErrorForInvalidMovieName() {
